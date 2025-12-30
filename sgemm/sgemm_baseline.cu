@@ -67,8 +67,8 @@ bool compareMat(float *mat_A,float *mat_B,const int row,const int col)
 int main()
 {
     const int m=512;
-    const int n=512;
-    const int k =512;
+    const int n=256;
+    const int k =128;
     constexpr size_t mem_size_A = m*k*sizeof(float);
     constexpr size_t mem_size_B = k*n*sizeof(float);
     constexpr size_t mem_size_C = m*n*sizeof(float);
@@ -76,7 +76,7 @@ int main()
     const int blockSize = 16;
     const int gridSize = (m+blockSize-1)/blockSize;
     dim3 Block(blockSize,blockSize);
-    dim3 Grid(gridSize,gridSize);
+    dim3 Grid((n+blockSize-1)/blockSize,(m+blockSize-1)/blockSize);
     float *mat_A = (float *)malloc(mem_size_A);
     float *mat_B = (float *)malloc(mem_size_B);
     float *mat_C = (float *)malloc(mem_size_C);
