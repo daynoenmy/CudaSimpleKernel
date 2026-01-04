@@ -5,7 +5,7 @@ void initMat(const int row,const int col,float *a)
     {
         for (int j = 0; j < col; j++)
         {
-            a[i*col+j] = 1.0f; //2.0f*(float)drand48()-1.0f;
+            a[i*col+j] = float(rand()%3);
         }
         
     }
@@ -22,7 +22,7 @@ void gemmCpu(float *a,float *b,float *c,const int M,const int K,const int N)
       float temp = 0.0f;
       for(int k=0;k<K;k++)
       {
-        temp += a[m*K+k]*b[k*K+n];
+        temp += a[m*K+k]*b[k*N+n];
       
       }
       c[m*N+n] = temp;
@@ -52,7 +52,7 @@ bool compareMat(float *mat_A,float *mat_B,const int row,const int col)
     {
         for (int j = 0; j < col; j++)
         {
-            if(abs(mat_A[i*col+j]-mat_B[i*col+j])>1e-6)
+            if((abs(mat_A[i*col+j]-mat_B[i*col+j])-1e-6)>1e-6)
             {
                 printf("error a = %f b=%f",mat_A[i*col+j],mat_B[i*col+j]);
                 printf("error diff:%f rows=%d,col=%d\n",abs(mat_A[i*col+j]-mat_B[i*col+j]),i,j);

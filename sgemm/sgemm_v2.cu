@@ -5,7 +5,7 @@ void initMat(const int row,const int col,float *a)
     {
         for (int j = 0; j < col; j++)
         {
-            a[i*col+j] = 1.0f; //2.0f*(float)drand48()-1.0f;
+            a[i*col+j] = float(rand()%3);
         }
         
     }
@@ -22,7 +22,7 @@ void gemmCpu(float *a,float *b,float *c,const int M,const int K,const int N)
       float temp = 0.0f;
       for(int k=0;k<K;k++)
       {
-        temp += a[m*K+k]*b[k*K+n];
+        temp += a[m*K+k]*b[k*N+n];
       
       }
       c[m*N+n] = temp;
@@ -35,9 +35,9 @@ bool compareMat(float *mat_A,float *mat_B,const int row,const int col)
     {
         for (int j = 0; j < col; j++)
         {
-            if(abs(mat_A[i*col+j]-mat_B[i*col+j])>1e-6)
+            if((double)abs(mat_A[i*col+j]-mat_B[i*col+j])>1e-6)
             {
-                printf("error a = %f b=%f",mat_A[i*col+j],mat_B[i*col+j]);
+                printf("error a = %f b=%f\n",mat_A[i*col+j],mat_B[i*col+j]);
                 printf("error diff:%f rows=%d,col=%d\n",abs(mat_A[i*col+j]-mat_B[i*col+j]),i,j);
                 return false;
             }
@@ -46,7 +46,8 @@ bool compareMat(float *mat_A,float *mat_B,const int row,const int col)
     }
     return true; 
 }
-template<int Block_Size_X,int Block_Size_Y,int Block_Size_K,int M,int K,int N>
+#define BLOCKSIZE 16
+template<int M,int K,int N>
 __global__ void sgemm_v2(float *mat_A,float *mat_B,float *mat_C)
 {
   
@@ -54,21 +55,21 @@ __global__ void sgemm_v2(float *mat_A,float *mat_B,float *mat_C)
     const int col = blockDim.x*blockIdx.x+threadIdx.x;
     float *mat_A_start_ptr=mat_A + blockDim.y*blockIdx.y*K;
     float *mat_B_start_ptr=mat_B + blockDim.x*blockIdx.x;
-    __shared__ float mat_A_shared[Block_Size_Y][Block_Size_K];
-    __shared__ float mat_B_shared[Block_Size_K][Block_Size_X];
+    __shared__ float mat_A_shared[BLOCKSIZE][BLOCKSIZE];
+    __shared__ float mat_B_shared[BLOCKSIZE][BLOCKSIZE];
     float temp=0.0f;
-    for (int i = 0; i <K ; i+=Block_Size_K)
+    for (int i = 0; i <K ; i+=BLOCKSIZE)
     {
-        for (int rk = threadIdx.x; rk < Block_Size_K; rk+=blockDim.x)
+        for (int rk = threadIdx.x; rk < BLOCKSIZE; rk+=blockDim.x)
         {
             mat_A_shared[threadIdx.y][rk] = mat_A_start_ptr[threadIdx.y*K+rk+i];
         }
-        for (int ck = threadIdx.y; ck < Block_Size_K; ck+= blockDim.y)
+        for (int ck = threadIdx.y; ck < BLOCKSIZE; ck+= blockDim.y)
         {
             mat_B_shared[ck][threadIdx.x] = mat_B_start_ptr[threadIdx.x+(ck+i)*N]; 
         }
         __syncthreads();
-        for (int j = 0; j < Block_Size_K; j++)
+        for (int j = 0; j < BLOCKSIZE; j++)
         {
             temp += mat_A_shared[threadIdx.y][j]*mat_B_shared[j][threadIdx.x];
         }
@@ -87,6 +88,7 @@ int main()
     constexpr size_t mem_size_C = m*n*sizeof(float);
     // 一个block最多1024个线程
     const int blockSize = 16;
+    // 没鸡毛用 请忽略
     constexpr int block_size_y = (m+blockSize-1)/blockSize;
     constexpr int block_size_x = (n+blockSize-1)/blockSize;
     constexpr int block_size_k =(k+blockSize-1)/blockSize;
@@ -108,7 +110,7 @@ int main()
     cudaMalloc(&mat_B_gpu,mem_size_B);
     cudaMemcpy(mat_A_gpu,mat_A,mem_size_A,cudaMemcpyHostToDevice);
     cudaMemcpy(mat_B_gpu,mat_B,mem_size_B,cudaMemcpyHostToDevice);
-    sgemm_v2<block_size_x,block_size_y,block_size_k,m,k,n><<<Grid,Block>>>(mat_A_gpu,mat_B_gpu,mat_C_gpu);
+    sgemm_v2<m,k,n><<<Grid,Block>>>(mat_A_gpu,mat_B_gpu,mat_C_gpu);
     cudaMemcpy(mat_res,mat_C_gpu,mem_size_C,cudaMemcpyDeviceToHost);
     if(compareMat(mat_C,mat_res,m,n))
     {
