@@ -1,3 +1,0 @@
-/home/sun/lab/CudaSimpleKernel/rmsnormal/build/CMakeFiles/main.dir
-/home/sun/lab/CudaSimpleKernel/rmsnormal/build/CMakeFiles/edit_cache.dir
-/home/sun/lab/CudaSimpleKernel/rmsnormal/build/CMakeFiles/rebuild_cache.dir

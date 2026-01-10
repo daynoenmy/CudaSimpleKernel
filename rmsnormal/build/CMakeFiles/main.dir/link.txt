@@ -1,1 +1,0 @@
-/usr/bin/g++ -g CMakeFiles/main.dir/main.cpp.o CMakeFiles/main.dir/rmsnormal_baseline.cu.o -o main   -L/usr/lib/x86_64-linux-gnu/stubs  -lcudadevrt -lcudart_static -lrt -lpthread -ldl 
