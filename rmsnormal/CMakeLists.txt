@@ -10,4 +10,4 @@ find_package(CUDAToolkit REQUIRED)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_35")
 
 # 设置 CMake 使用 CUDA 编译器来编译 .cu 文件
-target_link_libraries(main ${CUDA_LIBRARIES})
+# target_link_libraries(main ${CUDA_LIBRARIES})
