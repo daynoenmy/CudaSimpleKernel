@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/home/sun/lab/CudaSimpleKernel/rmsnormal/build",
+  "command": "/usr/bin/g++   -g -o CMakeFiles/main.dir/main.cpp.o -c /home/sun/lab/CudaSimpleKernel/rmsnormal/main.cpp",
+  "file": "/home/sun/lab/CudaSimpleKernel/rmsnormal/main.cpp"
+},
+{
+  "directory": "/home/sun/lab/CudaSimpleKernel/rmsnormal/build",
+  "command": "/usr/bin/nvcc -forward-unknown-to-host-compiler   -g -x cu -c /home/sun/lab/CudaSimpleKernel/rmsnormal/rmsnormal_baseline.cu -o CMakeFiles/main.dir/rmsnormal_baseline.cu.o",
+  "file": "/home/sun/lab/CudaSimpleKernel/rmsnormal/rmsnormal_baseline.cu"
+}
+]
