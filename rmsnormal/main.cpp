@@ -50,7 +50,7 @@ int main()
     cudaMalloc(&x_gpu, sizeof(float) * K * N);
     cudaMemcpy(x_gpu, x, sizeof(float) * K * N, cudaMemcpyHostToDevice);
     cudaMalloc(&y_gpu, sizeof(float) * K * N);
-    launch_kernel<256>(x_gpu, y_gpu, 1.0f, N, K);
+    launch_kernel<64>(x_gpu, y_gpu, 1.0f, N, K);
     float *out = (float *)malloc(sizeof(float) * N * K);
     cudaMemcpy(out, y_gpu, sizeof(float) * N * K, cudaMemcpyDeviceToHost);
     bool f = true;

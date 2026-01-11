@@ -4,5 +4,5 @@
 
 2. **归一化** $ \hat{x}_i = \frac{x_{i}}{RMS(x)+\epsilon}$
 
-3. **引入参数得到结果** $y_{i}=\gamma \hat{x
+3. **引入参数得到结果** $y_{i}=\gamma \hat{x}$
 
