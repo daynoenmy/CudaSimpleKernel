@@ -5,6 +5,7 @@
 #include <random>
 #include <chrono>
 #include "./layernormal.h"
+#define debug 0
 inline float mean(float *x, int len)
 {
     float sum = 0.0f;
@@ -30,7 +31,13 @@ void layer_normal_cpu(float *x, float *y, float gamma, const int N, const int K)
     {
         float m = mean(x + i * K, K);
         float v = variance(x + i * K, m, K);
-
+#if debug
+        if(i==0){
+            printf("mean=%f\n",m);
+            printf("variance=%f\n",1.0f/sqrt(v + eplison));
+            printf("x=%f\n",x[0]);
+        }   
+#endif
         for (int j = 0; j < K; j++)
         {
             y[i * K + j] = gamma * (x[i * K + j] - m) / sqrt(v + eplison);
