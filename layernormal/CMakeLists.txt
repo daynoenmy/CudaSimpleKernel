@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(CudaExample LANGUAGES CXX CUDA)
-add_executable(main main.cpp)
+add_executable(main main.cpp layernormal_baseline.cu)
 
 # 启用 CUDA 编译
 find_package(CUDAToolkit REQUIRED)
