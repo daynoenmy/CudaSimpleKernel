@@ -83,7 +83,7 @@ __global__ void safe_softmax_f32x4(float *x, float *y)
     reg_y.z = reg_exp.z / exp_sum;
     (reinterpret_cast<float4 *>(&y[idx]))[0] = reg_y;
 }
-torch::Tensor softmax_forward(torch::Tensor x)
+torch::Tensor safe_softmax_forward(torch::Tensor x)
 {
     torch::Tensor y = torch::zeros_like(x);
     const int N = 256;
