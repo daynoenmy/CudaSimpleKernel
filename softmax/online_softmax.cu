@@ -11,10 +11,10 @@ void online_softmax_cpu(float *x, float *y, int B, int S)
     {
         float max_value = 0.0f;
         float sum = 0.0f;
-        float pre_value = 0.0f;
+        float pre_value = -INFINITY;
         for (int i = 0; i < S; i++)
         {
-            max_value = fmaxf(x[i + j * S], -INFINITY);
+            max_value = fmaxf(x[i + j * S], pre_value);
             sum = sum * expf(pre_value - max_value) + expf(x[i + j * S] - max_value);
             pre_value = max_value;
         }
