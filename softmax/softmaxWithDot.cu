@@ -101,6 +101,7 @@ bool compare_res(float *cpu,float *gpu,int len,float diff)
     }
     return true;
 }
+// 编译命令 nvcc ./softmaxWidthDot.cu -o main -lcurand
 int main()
 {
     const int N = 512;
