@@ -16,10 +16,17 @@ K =32
 x = torch.rand(M,K,device="cuda",dtype=torch.float16)
 y = torch.rand(K,N,device="cuda",dtype=torch.float16)
 z = hgemm_naive(x,y)
-my_out = lib.matrix_mul_v1(x,y)
+my_out = lib.matrix_mul_float4(x,y)
 # baseline的误差会随着K的增大而增大
 # 128 时 dif >1e-2
 print('softmax values sanity check:', torch.allclose(z, my_out, rtol=0, atol=1e-02))
 diff = (z - my_out).abs()
+
 idx = diff.argmax()
+i = idx // diff.size(1)
+j = idx % diff.size(1)
+
 print("最大误差:", diff.max().item())
+print("位置:", i.item(), j.item())
+print("out:", my_out[i, j].item())
+print("ref:", z[i, j].item())
