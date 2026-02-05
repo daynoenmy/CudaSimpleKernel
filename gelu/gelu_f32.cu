@@ -18,6 +18,27 @@ __global__ void gelu_baseline(float *input, float *out)
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     out[idx] = gelu_tanh_approximate(input[idx]);
 }
+__device__ __forceinline__ float4 apply_gelu(float4 v)
+{
+    return make_float4(
+        gelu_tanh_approximate(v.x),
+        gelu_tanh_approximate(v.y),
+        gelu_tanh_approximate(v.z),
+        gelu_tanh_approximate(v.w));
+}
+__global__ void gelu_f32x4(float *input, float *out)
+{
+    int idx = (blockIdx.x * blockDim.x + threadIdx.x) * 4;
+    float4 reg_x;
+    reg_x = reinterpret_cast<float4 *>(&input[idx])[0];
+    float4 reg_y;
+    // reg_y.x = gelu_tanh_approximate(reg_x.x);
+    // reg_y.y = gelu_tanh_approximate(reg_x.y);
+    // reg_y.z = gelu_tanh_approximate(reg_x.z);
+    // reg_y.w = gelu_tanh_approximate(reg_x.w);
+    reg_y = apply_gelu(reg_x);
+    reinterpret_cast<float4 *>(&out[idx])[0] = reg_y;
+}
 template <const int size>
 void gelu_cpu(float *input, float *out)
 {
@@ -26,17 +47,17 @@ void gelu_cpu(float *input, float *out)
         out[i] = gelu_tanh_approximate_cpu(input[i]);
     }
 }
-bool compare(float *ref,float *out,const int len,float dif)
+bool compare(float *ref, float *out, const int len, float dif)
 {
     for (int i = 0; i < len; i++)
     {
-        if(abs(ref[i]-out[i])>dif){
-            printf("index=%d,ref:%f,out:%f\n",i,ref[i],out[i]);
+        if (abs(ref[i] - out[i]) > dif)
+        {
+            printf("index=%d,ref:%f,out:%f\n", i, ref[i], out[i]);
             return false;
         }
     }
     return true;
-    
 }
 
 int main()
@@ -58,16 +79,24 @@ int main()
     printf("CPU开始计算\n");
     gelu_cpu<len>(input, ref);
     printf("CPU计算完成\n");
-    float *res = (float *)malloc(sizeof(float)*len);
+    float *res = (float *)malloc(sizeof(float) * len);
     const int block_size = 256;
-    dim3 block(block_size);
-    dim3 grid(len/block_size);
-    gelu_baseline<<<grid,block>>>(data,out);
-    cudaMemcpy(res,out,sizeof(float)*len,cudaMemcpyDeviceToHost);
-    bool f = compare(ref,res,len,1e-5);
-    if(f){
+    //  baseline
+    // dim3 block(block_size);
+    // dim3 grid(len / block_size);
+    // gelu_baseline<<<grid, block>>>(data, out);
+    // f32x4
+    dim3 block(block_size / 4);
+    dim3 grid(len / block_size);
+    gelu_f32x4<<<grid, block>>>(data, out);
+    cudaMemcpy(res, out, sizeof(float) * len, cudaMemcpyDeviceToHost);
+    bool f = compare(ref, res, len, 1e-5);
+    if (f)
+    {
         printf("计算无误\n");
-    }else{
+    }
+    else
+    {
         printf("计算有误\n");
     }
 }
